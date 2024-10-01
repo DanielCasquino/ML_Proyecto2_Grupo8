@@ -2,17 +2,20 @@ import numpy as np
 import matplotlib.pyplot as plt
 import librosa
 import os
-import svm
+import pandas as pd
+import seaborn as sns
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import confusion_matrix, accuracy_score, classification_report
+from svm import SVM
 
-path = './tos/cleaned_data/'
-
+path = './cleaned_data/'
 
 def encode(path):
   positives = []
-  positives_directory = os.listdir(path + "/Positive")
+  positives_directory = os.listdir(path + "Positive")
   print("Loading positives...")
   for f in positives_directory:
-    y, sr = librosa.load(path + "/Positive/" + f)
+    y, sr = librosa.load(path + "Positive/" + f)
     mfccs = librosa.feature.mfcc(y=y, sr=sr)
     fv = mfccs.mean(axis = 1)
     positives.append(fv)
@@ -21,10 +24,10 @@ def encode(path):
   print("Loading finished!")
 
   negatives = []
-  negatives_directory = os.listdir(path + "/Negative")
+  negatives_directory = os.listdir(path + "test_neg")
   print("Loading negatives...")
   for f in negatives_directory:
-    y, sr = librosa.load(path + "/Negative/" + f)
+    y, sr = librosa.load(path + "test_neg/" + f)
     mfccs = librosa.feature.mfcc(y=y, sr=sr)
     fv = mfccs.mean(axis = 1)
     negatives.append(fv)
@@ -40,7 +43,25 @@ def encode(path):
   print("Done!")
   return x, y
 
+def matriz_confusion(y_pred, y_test, Tipo):
+  matrix = confusion_matrix(y_test, y_pred)
+  f2 = pd.DataFrame(matrix.astype('float') / matrix.sum(axis=1)[:, np.newaxis], index=["Negative", 'Positive'], columns=["Negative", 'Positive'])
+  sns.heatmap(f2, annot=True, cbar=None, cmap="Greens")
+  plt.title("Confusion Matrix"  + Tipo ), plt.tight_layout()
+  plt.xlabel("Predicted")
+  plt.ylabel("Real")
+  plt.show()
 
-x_train, y_train = encode(path)
-print(x_train.shape, y_train.shape)
+X_data, Y_data = encode(path)
+x_train, x_test, y_train, y_test = train_test_split(X_data, Y_data, test_size=0.3)
 
+model = SVM(1e8, 1e-10, 6000)
+model.train(x_train, y_train)
+y_pred = model.predict(x_test)
+print(y_pred)
+print(y_test)
+matriz_confusion(y_pred, y_test, " : SVM")
+
+report = classification_report(y_test, y_pred, target_names = ["Negative", "Positive"])
+print("Metrics")
+print(report)
