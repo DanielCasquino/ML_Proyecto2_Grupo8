@@ -2,3 +2,6 @@ numpy
 librosa
 matplotlib
 scikit-learn
+scipy
+imbalanced-learn
+pandas
