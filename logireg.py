@@ -11,7 +11,7 @@ class Logistic_regression:
   def S(self,X):
     return 1/(1+np.exp(-self.h(X)))
 
-  def loss(self,y,y_aprox):#y_trainig and y de S(X)
+  def loss(self,y,y_aprox):
     n=len(y)
     ep=1e-15
     y_aporx=np.clip(y_aprox,ep,1-ep)
@@ -25,7 +25,7 @@ class Logistic_regression:
   def actualizar_parametros(self,dW):
     self.W-=(self.alpha*dW)
 
-  def fit(self,X,Y,epochs):#x_train and y_train
+  def fit(self,X,Y,epochs):
     n=X.shape[1]
     self.W=np.zeros(n)
     for epoch in range(epochs): 
@@ -33,6 +33,6 @@ class Logistic_regression:
       dW=self.derivada(X,Y)
       self.actualizar_parametros(dW)
 
-  def pred(self,X):#x_test apra obtener y_pred 
+  def pred(self,X):
     prob=self.S(X)
-    return (prob >= np.median(prob)).astype(int)  #ponemos como umbral la mediana del dato de probabilidades para tener un mejor equilibrio de valores
+    return (prob >= np.median(prob)).astype(int)  
