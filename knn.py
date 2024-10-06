@@ -1,30 +1,16 @@
 from scipy.spatial import KDTree
 from scipy.stats import mode
-from sklearn.model_selection import KFold
+from sklearn.model_selection import cross_val_score
 from sklearn.neighbors import KNeighborsClassifier
-from sklearn.metrics import accuracy_score
 import numpy as np
 import pandas as pd
 
 ### Implementacion de knn con k-fold usando sklearn
 def KNN_Kfold(X, Y, k):
-    kfold = KFold(n_splits=10)
     knn = KNeighborsClassifier(n_neighbors=k, algorithm='kd_tree')
-
-    accuracies = []
-
-    for train_index, test_index in kfold.split(X):
-        x_train, x_test = X[train_index], X[test_index]
-        y_train, y_test = Y[train_index], Y[test_index]
-        knn.fit(x_train, y_train)
-        y_pred = knn.predict(x_test)
-
-        a = accuracy_score(y_test, y_pred)
-        accuracies.append(a)
-    
-    accuracy = np.mean(accuracies)
-    error = 1 - accuracy 
-
+    accuracies = cross_val_score(knn, X, Y, cv=10, scoring='accuracy')    
+    accuracy = accuracies.mean()
+    error = 1 - accuracy
     return accuracy, error
     
 ### Calcular k-fold a traves de multiples valores de k. El mejor se saca al ojo
