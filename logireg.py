@@ -1,4 +1,4 @@
-class Logistic_regression:
+class LR:
 
   def __init__(self, alpha,lam):
     self.alpha=alpha
