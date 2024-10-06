@@ -9,6 +9,7 @@ from sklearn.metrics import confusion_matrix, accuracy_score, classification_rep
 
 from svm import SVM
 from knn import KNN
+from logireg import LR
 
 path = './cleaned_data/'
 
