@@ -1,3 +1,31 @@
+r"""
+KNearestNeighbours
+===
+
+This module contains an implementation of a KNN class for our Machine Learning project.
+
+This module exports:
+  - KNN class
+
+Usage
+-----
+To create an instance of the KNN class, do::
+
+  >>> model = KNN(k)
+
+Constructor parameters are (in order):
+  - `k` number of neighbours to find when predicting
+
+To train a created model, do::
+
+  >>> model.fit(x_train, y_train)
+
+To predict labels by getting the K nearest neighbours, do::
+
+  >>> model.predict(x_test)
+
+"""
+
 from scipy.spatial import KDTree
 from scipy.stats import mode
 from sklearn.model_selection import cross_val_score
@@ -26,7 +54,7 @@ def get_best_k(X, Y, n):
     return df
 
 ### IMPLEMENTACION DE KNN CON KDTREE
-class NearestNeighbor:
+class KNN:
     def __init__(self, k=5):
         self.k = k
         self.tree = None

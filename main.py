@@ -6,7 +6,9 @@ import pandas as pd
 import seaborn as sns
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import confusion_matrix, accuracy_score, classification_report
+
 from svm import SVM
+from knn import KNN
 
 path = './cleaned_data/'
 

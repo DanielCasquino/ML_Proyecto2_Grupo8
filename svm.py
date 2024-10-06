@@ -18,9 +18,16 @@ Constructor parameters are (in order):
   - `alpha` the alpha constant - controls model reaction to slope change
   - `epochs` number of training iterations
 
+To train the model, do::
+
+  >>> model.train(x_train, y_train)
+
+To test the model, do::
+
+  >>> model.predict(x_test)
+
 """
 import numpy as np
-
 
 class SVM:
     def __init__(self, c=1e8, alpha=1e-10, epochs=39000):
