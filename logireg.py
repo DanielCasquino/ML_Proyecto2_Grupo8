@@ -58,7 +58,7 @@ class LR:
 
   def fit(self, x_train, y_train, epochs):
     n= x_train.shape[1]
-    self.w = np.zeros(n)
+    self.w = np.array([np.random.rand() for i in range(n)])
     for _ in range(epochs): 
       y_aprox = self.s(x_train)
       d_w = self.derivatives(x_train,y_train)
