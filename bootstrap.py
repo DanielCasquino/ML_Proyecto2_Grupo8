@@ -45,3 +45,19 @@ def test_knn_bootstrapped(x, y, iterations = 10):
 
         results[i] = [acc, prec, f1, rec]
     display_results(results)
+
+def test_lr_bootstrapped(x, y, iterations = 10):
+    model = LR(alpha=0.00001, lam=0.01)
+    results = np.zeros((iterations, 4))
+    for i in range(iterations):
+        x_boot, y_boot = get_bootstrapped_dataset(x, y)
+        model.fit(x_boot, y_boot, epochs=5000)
+        y_pred = model.predict(x_boot)
+
+        acc = accuracy_score(y_boot, y_pred)
+        prec = precision_score(y_boot, y_pred)
+        f1 = f1_score(y_boot, y_pred)
+        rec = recall_score(y_boot, y_pred)
+
+        results[i] = [acc, prec, f1, rec]
+    display_results(results, "LR")
