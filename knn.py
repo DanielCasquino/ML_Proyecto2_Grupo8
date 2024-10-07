@@ -25,36 +25,50 @@ To predict labels by getting the K nearest neighbours, do::
   >>> model.predict(x_test)
 
 """
-
 from scipy.spatial import KDTree
 from scipy.stats import mode
-from sklearn.model_selection import cross_val_score
-from sklearn.neighbors import KNeighborsClassifier
+from sklearn.metrics import classification_report
+from sklearn.model_selection import KFold
 import numpy as np
-import pandas as pd
+import matplotlib.pyplot as plt
 
-### Implementacion de knn con k-fold usando sklearn
-def KNN_Kfold(X, Y, k):
-    knn = KNeighborsClassifier(n_neighbors=k, algorithm='kd_tree')
-    accuracies = cross_val_score(knn, X, Y, cv=10, scoring='accuracy')    
-    accuracy = accuracies.mean()
-    error = 1 - accuracy
-    return accuracy, error
+### KFold for KNN
+def KNN_Kfold(X, Y):
+    kfold = KFold(n_splits=10, shuffle=True, random_state=42)
+    results = np.zeros((10, 4))
+
+    i = 0
+    for train_index, test_index in kfold.split(X):
+        x_train, x_test = X[train_index], X[test_index]
+        y_train, y_test = Y[train_index], Y[test_index]
+
+        knn = NearestNeighbor(k=2)
+        knn.fit(x_train, y_train)
+        y_pred = knn.predict(x_test)
+
+        report = classification_report(y_test, y_pred, target_names=["Negative", "Positive"], output_dict=True)
+        a = report['accuracy']
+        p = report['weighted avg']['precision']
+        r = report['weighted avg']['recall']
+        f = report['weighted avg']['f1-score']
+        results[i] = [a,p,r,f]
+        i += 1
     
-### Calcular k-fold a traves de multiples valores de k. El mejor se saca al ojo
-def get_best_k(X, Y, n):
-    res = []
+    iterations = range(results.shape[0])
 
-    for i in range(1, n+1):
-        mean_accuracy, mean_error = KNN_Kfold(X, Y, i)
-        r = [i, round(mean_accuracy, 2), round(mean_error, 2)]
-        res.append(r)
+    plt.plot(iterations, results[:, 0], label='Accuracy', color='red', linewidth=1)
+    plt.plot(iterations, results[:, 1], label='Precision', color='blue', linewidth=1)
+    plt.plot(iterations, results[:, 2], label='F1 Score', color='green', linewidth=1)
+    plt.plot(iterations, results[:, 3], label='Recall', color='purple', linewidth=1)
 
-    df = pd.DataFrame(res, columns=['k', 'Mean Accuracy', 'Mean Error'])
-    return df
+    plt.title('10-fold Cross Validation Performance Metrics of KNN')
+    plt.xlabel('Fold')
+    plt.ylabel('Scores')
+    plt.legend(loc="lower right")
+    plt.show()
 
-### IMPLEMENTACION DE KNN CON KDTREE
-class KNN:
+### MANUAL IMPLEMENTATION OF KNN
+class NearestNeighbor:
     def __init__(self, k=5):
         self.k = k
         self.tree = None
@@ -67,5 +81,17 @@ class KNN:
     def predict(self, X_test):
         d, indices = self.tree.query(X_test, k=self.k)
         labels = self.y_train[indices]
-        common_label = mode(labels, axis=1)
-        return common_label.mode.flatten()
+
+        if self.k == 1:
+            return labels.flatten()
+        else:
+            common_label = mode(labels, axis=1)
+            return common_label.mode.flatten()
+
+def run_KNN(x_train, x_test, y_train, y_test, k):
+    knn = NearestNeighbor(k)
+    knn.fit(x_train, y_train)
+    y_pred = knn.predict(x_test)
+    report = classification_report(y_test, y_pred, target_names=["Negative", "Positive"], output_dict=True)
+    f1 = report['weighted avg']['f1-score']
+    return f1
