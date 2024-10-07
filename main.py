@@ -10,15 +10,18 @@ from sklearn.metrics import confusion_matrix, accuracy_score, classification_rep
 from svm import SVM
 from knn import KNN
 from logireg import LR
+from dtree import DT
+from bootstrap import *
 
-path = './cleaned_data/'
+np.random.seed(42)
+path = './tos/cleaned_data/'
 
 def encode(path):
   positives = []
-  positives_directory = os.listdir(path + "Positive")
+  positives_directory = os.listdir(path + "PositiveRepeated")
   print("Loading positives...")
   for f in positives_directory:
-    y, sr = librosa.load(path + "Positive/" + f)
+    y, sr = librosa.load(path + "PositiveRepeated/" + f)
     mfccs = librosa.feature.mfcc(y=y, sr=sr)
     fv = mfccs.mean(axis = 1)
     positives.append(fv)
@@ -27,10 +30,10 @@ def encode(path):
   print("Loading finished!")
 
   negatives = []
-  negatives_directory = os.listdir(path + "test_neg")
+  negatives_directory = os.listdir(path + "Negative")
   print("Loading negatives...")
   for f in negatives_directory:
-    y, sr = librosa.load(path + "test_neg/" + f)
+    y, sr = librosa.load(path + "Negative/" + f)
     mfccs = librosa.feature.mfcc(y=y, sr=sr)
     fv = mfccs.mean(axis = 1)
     negatives.append(fv)
@@ -58,13 +61,57 @@ def matriz_confusion(y_pred, y_test, Tipo):
 X_data, Y_data = encode(path)
 x_train, x_test, y_train, y_test = train_test_split(X_data, Y_data, test_size=0.3)
 
-model = SVM(1e8, 1e-10, 6000)
-model.train(x_train, y_train)
-y_pred = model.predict(x_test)
-print(y_pred)
-print(y_test)
-matriz_confusion(y_pred, y_test, " : SVM")
 
-report = classification_report(y_test, y_pred, target_names = ["Negative", "Positive"])
-print("Metrics")
-print(report)
+def test_svm():
+  print("Training SVM...")
+  model = SVM(1e8, 1e-10, 39000)
+  model.train(x_train, y_train)
+  y_pred = model.predict(x_test)
+  print(y_pred)
+  print(y_test)
+  matriz_confusion(y_pred, y_test, ": SVM")
+
+  report = classification_report(y_test, y_pred, target_names = ["Negative", "Positive"])
+  print("Metrics")
+  print(report)
+
+
+def test_knn():
+  print("Training KNN...")
+  model = KNN()
+  model.fit(x_train, y_train)
+  y_pred = model.predict(x_test)
+  print(y_pred)
+  print(y_test)
+  matriz_confusion(y_pred, y_test, ": KNN")
+
+  report = classification_report(y_test, y_pred, target_names = ["Negative", "Positive"])
+  print("Metrics")
+  print(report)
+
+def test_lr():
+  model = LR(1e-2, 1e6)
+  model.fit(x_train, y_train, 5000)
+  y_pred = model.predict(x_test)
+  print(y_pred)
+  print(y_test)
+  matriz_confusion(y_pred, y_test, ": LR")
+
+  report = classification_report(y_test, y_pred, target_names = ["Negative", "Positive"])
+  print("Metrics")
+  print(report)
+
+
+def test_dt():
+  model = DT(x_train, y_train)
+  y_pred = model.predict(x_test)
+  print(y_pred)
+  print(y_test)
+  matriz_confusion(y_pred, y_test, ": DT")
+
+  report = classification_report(y_test, y_pred, target_names = ["Negative", "Positive"])
+  print("Metrics")
+  print(report)
+
+
+test_knn_bootstrapped(x_train, y_train)
