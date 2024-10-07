@@ -6,7 +6,7 @@ import pandas as pd
 import seaborn as sns
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import confusion_matrix, accuracy_score, classification_report
-
+from imblearn.over_sampling import SMOTE
 from svm import SVM
 from knn import KNN
 from logireg import LR
@@ -58,9 +58,10 @@ def matriz_confusion(y_pred, y_test, Tipo):
   plt.ylabel("Real")
   plt.show()
 
-X_data, Y_data = encode(path)
-x_train, x_test, y_train, y_test = train_test_split(X_data, Y_data, test_size=0.3)
-
+X, Y = encode(path)
+sm = SMOTE(random_state=42)
+X, Y = sm.fit_resample(X, Y)
+x_train, x_test, y_train, y_test = train_test_split(X, Y, test_size = 0.3, random_state = 42)
 
 def test_svm():
   print("Training SVM...")
@@ -112,6 +113,59 @@ def test_dt():
   report = classification_report(y_test, y_pred, target_names = ["Negative", "Positive"])
   print("Metrics")
   print(report)
+
+### LLAMA ESTA FUNCION PARA PROBAR EL MODELO
+def exec_knn():
+    k = [i for i in range(1,11)]
+    f1_scores_knn = []
+    for i in k:
+        f1 = run_KNN(x_train, x_test, y_train, y_test, i)
+        f1_scores_knn.append(f1)
+
+    plt.plot(k, f1_scores_knn)
+    plt.title("Evolucion de f1 scores del KNN")
+    plt.xlabel("Valor de k_neighbors")
+    plt.ylabel("F1-Score")
+    plt.grid()
+    plt.show()
+
+    KNN_Kfold(X, Y)
+    test_knn_bootstrapped(X, Y)
+
+    knn = NearestNeighbor(k=2)
+    knn.fit(x_train, y_train)
+    y_pred = knn.predict(x_test)
+    report = classification_report(y_test, y_pred, target_names=["Negative", "Positive"])
+    print(report)
+    matriz_confusion(y_pred, y_test, " : LR")
+
+### LLAMA ESTA FUNCION PARA PROBAR EL MODELO
+def exec_lr():
+    k = [10**i for i in range(-5,1)]
+    f1_scores_lr = []
+    for i in k:
+        f1 = run_LR(x_train, x_test, y_train, y_test, i)
+        f1_scores_lr.append(f1)
+
+    plt.plot(k, f1_scores_lr)
+    plt.title("Evolucion de f1 scores del LR")
+    plt.xlabel("Valor del lambda")
+    plt.ylabel("F1-Score")
+    plt.grid()
+    plt.show()
+
+    LR_Kfold(X, Y)
+    test_lr_bootstrapped(X, Y)
+
+    lr = LR(alpha=0.00001, lam=0.01)
+    lr.fit(x_train, y_train, epochs=5000)
+    y_pred = lr.predict(x_test)
+    report = classification_report(y_test, y_pred, target_names=["Negative", "Positive"])
+    print(report)
+    matriz_confusion(y_pred, y_test, " : LR")
+
+#exec_lr() ---> para ver la regresion logistica
+#exec_knn() ---> para ver el KNN
 
 
 test_knn_bootstrapped(x_train, y_train)
