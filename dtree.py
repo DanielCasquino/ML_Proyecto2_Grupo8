@@ -2,7 +2,7 @@ import numpy as np
 
 class Nodo:
     # Define what your data members will be
-    def __init__(self, index=None, umbral=None):
+    def __init__(self, index=None, umbral=None, min_samples_node=5):
         # Initialize data members
         self.label = None  # label solo para la hoja
 
@@ -11,10 +11,11 @@ class Nodo:
 
         self.left = None
         self.right = None
+        self.msn = min_samples_node
 
     def IsTerminal(self, Y):
         # return true if this node has the same labels in Y
-        return (len(Y) < 5) or (len(np.unique(Y)) == 1 and np.unique(Y)[
+        return (len(Y) < self.msn) or (len(np.unique(Y)) == 1 and np.unique(Y)[
             0] == self.label)  # los datos de Y son todos de la misma featura
 
     def BestSplit(self, x, y):
@@ -97,21 +98,21 @@ class Nodo:
 class DT:
     # Defina cuales será sus mimbros datos
 
-    def __init__(self, X, Y, index):
+    def __init__(self, X, Y, min_samples_node=5):
         # Inicializar los mimbros datos
+        self.msn = min_samples_node
         self.m_Root = self.create_DT(X, Y)
 
     def create_DT(self, X, Y):
-        print(Y)
         # write your code here
         samples = len(Y)
         features = len(X)
         if (len(np.unique(Y)) == 1):
-            new_Node = Nodo()
+            new_Node = Nodo(min_samples_node=self.msn)
             new_Node.label = Y[0]
             return new_Node
-        elif samples < 5:
-            new_Node = Nodo()
+        elif samples < self.msn:
+            new_Node = Nodo(min_samples_node=self.msn)
             labels_y, ocurrencias_y = np.unique(Y, return_counts=True)
             new_Node.label = labels_y[np.argmax(ocurrencias_y)]
             return new_Node
@@ -127,7 +128,7 @@ class DT:
 
     # return the best feature node with their 2 children
     def Find_Best_Split(self, X, Y):
-        new_Node = Nodo()
+        new_Node = Nodo(min_samples_node=self.msn)
         left_data_x, right_data_x, left_data_y, right_data_y = new_Node.BestSplit(X, Y)
 
         return new_Node, left_data_x, right_data_x, left_data_y, right_data_y
